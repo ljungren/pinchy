@@ -1,0 +1,23 @@
+{
+  "name": "pinchy",
+  "version": "1.0.0",
+  "description": "smart home system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljungren/pinchy.git"
+  },
+  "author": "Joakim Ljungren",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ljungren/pinchy/issues"
+  },
+  "homepage": "https://github.com/ljungren/pinchy#readme",
+  "devDependencies": {
+    "johnny-five": "^0.10.6",
+    "pubnub": "^4.3.2"
+  }
+}
