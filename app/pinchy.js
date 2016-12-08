@@ -1,25 +1,25 @@
-var interface = require('./interface')
-//var five = require('johnny-five');
-//var board = new five.Board();
+const apiInterface = require('./interface')
+//const five = require('johnny-five');
+//const board = new five.Board();
 
-var connectedDevices = [];
+let connectedDevices = [];
 //implement security
 
 //module.exports = board.on('ready', function() {
   //blink lights
-module.exports = function(){
+module.exports = () => {
   // led = new five.Led(13); // pin 13
   // led.blink(500); // 500ms interval
 
-  /*create listener on channel with 
-  callback on established connection and on response*/
-  interface.addChannelListener('pinchy_channel', function(){
+  /*create listener on channel with
+  callback on established connection and on request*/
+  apiInterface.addChannelListener('pinchy_channel', () => {
     //Connection callback
-    var testMessage = responseFactory('info', 'sender', 'videoId', '3000')
+    let testMessage = responseFactory('info', 'sender', 'videoId', '3000')
     console.log('connection established, sends test object: ' + testMessage.tag);
-    interface.publishMessage(testMessage);
+    apiInterface.publishMessage(testMessage);
   },
-  function(m){
+  (m) => {
     //response callback
     console.log('recieved message on ' + m.channel + ': ' + m.message.tag);
     formatResponse(m);
@@ -27,7 +27,7 @@ module.exports = function(){
   });
 
 
-  var formatResponse = function(m){
+  let formatResponse = (m) => {
     //check tag and format response accordingly
     if(m.channel=='pinchy_channel'){
       switch(m.message.tag){
@@ -39,9 +39,9 @@ module.exports = function(){
           break;
         case 'notify':
           //activity started, initialize other device
-          var init = responseFactory('init', 'pinchy', 'videoId...', transmitDuration + 1000);
+          let init = responseFactory('init', 'pinchy', 'videoId...', transmitDuration + 1000);
           console.log('sending ' + init.tag);
-          interface.publishMessage(init);
+          apiInterface.publishMessage(init);
           break;
 
         case 'ready':
@@ -51,14 +51,14 @@ module.exports = function(){
 
         case 'info':
           //swicth playing device, send start and stop
-          var transmitDuration = calcDiff(m.message.timeStamp);
+          let transmitDuration = calcDiff(m.message.timeStamp);
           //console.log('transmitDuration in milliseconds: ' + transmitDuration);
           //console.log('time to start/stop: ' + response.info.time);
           console.log('Sending start and stop');
-          var start = responseFactory('start', 'pinchy', 'videoId...', transmitDuration + 1000);
-          var stop = responseFactory('stop', 'pinchy', 'videoId...', transmitDuration + 1000);
-          interface.publishMessage(start);
-          interface.publishMessage(stop);
+          let start = responseFactory('start', 'pinchy', 'videoId...', transmitDuration + 1000);
+          let stop = responseFactory('stop', 'pinchy', 'videoId...', transmitDuration + 1000);
+          apiInterface.publishMessage(start);
+          apiInterface.publishMessage(stop);
           break;
 
         default:
@@ -75,16 +75,16 @@ module.exports = function(){
     }
   }
 
-  var calcDiff = function(timestamp){
+  let calcDiff = (timestamp) => {
     return Date.now() - parseInt(timestamp);
   }
 
-  var addSensorListener = function(){
+  let addSensorListener = () => {
     //when couch sensor is triggered, send question, then listen for finger input
     console.log('listen for sensor input');
     //when finger input, send choice and info
   }
-  var responseFactory = function(tag, sender, videoId, time){
+  let responseFactory = (tag, sender, videoId, time) => {
       return {
         "tag": tag,
         "sender": sender,

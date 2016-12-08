@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ljungren/pinchy#readme",
   "devDependencies": {
+    "babel-core": "^6.18.2",
     "johnny-five": "^0.10.6",
     "pubnub": "^4.3.2"
   }

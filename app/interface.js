@@ -1,9 +1,9 @@
-var PubNub = require('pubnub');
+const PubNub = require('pubnub');
 
-var publishKey = "pub-c-22d7266d-4ebc-43b7-bbed-8feb537f0eb2";
-var subscribeKey = "sub-c-56c59d4e-b6d6-11e6-a071-02ee2ddab7fe";
+const publishKey = "pub-c-22d7266d-4ebc-43b7-bbed-8feb537f0eb2";
+const subscribeKey = "sub-c-56c59d4e-b6d6-11e6-a071-02ee2ddab7fe";
 
-var pubnub = new PubNub({
+const pubnub = new PubNub({
     subscribeKey: subscribeKey,
     publishKey: publishKey,
     ssl: true
@@ -12,41 +12,41 @@ var pubnub = new PubNub({
 
 module.exports = {
            
-    publishMessage: function(message) {
+    publishMessage: (message) => {
         
-        var publishConfig = {
+        const publishConfig = {
             channel : "pinchy_channel",
             message : message
         }
-        pubnub.publish(publishConfig, function(status, response) {
+        pubnub.publish(publishConfig, (status, response) => {
             //console.log(status, response);
         });
     },
        
-    addChannelListener: function(channelName, connectedCallback, responseCallback) {
+    addChannelListener: (channelName, connectedCallback, responseCallback) => {
 
         pubnub.addListener({
     
-            message: function(m) {
+            message: (m) => {
                 // handle message
-                var channelName = m.channel; // The channel for which the message belongs
-                var channelGroup = m.subscription; // The channel group or wildcard subscription match (if exists)
-                var pubTT = m.timetoken; // Publish timetoken
-                var msg = m.message; // The Payload
+                let channelName = m.channel; // The channel for which the message belongs
+                let channelGroup = m.subscription; // The channel group or wildcard subscription match (if exists)
+                let pubTT = m.timetoken; // Publish timetoken
+                let msg = m.message; // The Payload
                 responseCallback(m)
             },
-            presence: function(p) {
+            presence: (p) => {
                 // handle presence
-                var action = p.action; // Can be join, leave, state-change or timeout
-                var channelName = p.channel; // The channel for which the message belongs
-                var occupancy = p.occupancy; // No. of users connected with the channel
-                var state = p.state; // User State
-                var channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
-                var publishTime = p.timestamp; // Publish timetoken
-                var timetoken = p.timetoken;  // Current timetoken
-                var uuid = p.uuid; // UUIDs of users who are connected with the channel
+                let action = p.action; // Can be join, leave, state-change or timeout
+                let channelName = p.channel; // The channel for which the message belongs
+                let occupancy = p.occupancy; // No. of users connected with the channel
+                let state = p.state; // User State
+                let channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
+                let publishTime = p.timestamp; // Publish timetoken
+                let timetoken = p.timetoken;  // Current timetoken
+                let uuid = p.uuid; // UUIDs of users who are connected with the channel
             },
-            status: function(statusEvent) {
+            status: (statusEvent) => {
               if (statusEvent.category === "PNConnectedCategory") {
                 //sends publish when listener is connected
                 connectedCallback();
