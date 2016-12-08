@@ -1,14 +1,15 @@
 var interface = require('./interface')
-var five = require('johnny-five');
-var board = new five.Board();
+//var five = require('johnny-five');
+//var board = new five.Board();
 
 var connectedDevices = [];
 //implement security
 
-module.exports = board.on('ready', function() {
+//module.exports = board.on('ready', function() {
   //blink lights
-  led = new five.Led(13); // pin 13
-  led.blink(500); // 500ms interval
+module.exports = function(){
+  // led = new five.Led(13); // pin 13
+  // led.blink(500); // 500ms interval
 
   /*create listener on channel with 
   callback on established connection and
@@ -16,7 +17,7 @@ module.exports = board.on('ready', function() {
   interface.addChannelListener('pinchy_channel', function(){
     //Connection callback
     //example message: tag, sender, videoId, videoTime
-    var testMessage = responseFactory('notify', 'test', 'test', '3000')
+    var testMessage = responseFactory('info', 'test', 'test', '3000')
     console.log('connection established, sends test object: ' + testMessage.tag);
     interface.publishMessage(testMessage);
   },
@@ -87,7 +88,7 @@ module.exports = board.on('ready', function() {
 
   var addSensorListener = function(){
     //when couch sensor is triggered, send question, then listen for finger input
-
+    console.log('listen for sensor input');
     //when finger input, send choice and info
   }
   var responseFactory = function(tag, sender, videoId, time){
@@ -102,4 +103,5 @@ module.exports = board.on('ready', function() {
       }
   }
 
-});
+//});
+}
