@@ -12,12 +12,10 @@ module.exports = function(){
   // led.blink(500); // 500ms interval
 
   /*create listener on channel with 
-  callback on established connection and
-  callback with response*/
+  callback on established connection and on response*/
   interface.addChannelListener('pinchy_channel', function(){
     //Connection callback
-    //example message: tag, sender, videoId, videoTime
-    var testMessage = responseFactory('info', 'test', 'test', '3000')
+    var testMessage = responseFactory('info', 'sender', 'videoId', '3000')
     console.log('connection established, sends test object: ' + testMessage.tag);
     interface.publishMessage(testMessage);
   },
@@ -32,9 +30,6 @@ module.exports = function(){
   var formatResponse = function(m){
     //check tag and format response accordingly
     if(m.channel=='pinchy_channel'){
-      
-      var response = m.message;
-
       switch(m.message.tag){
         case 'connect':
           if(!connectedDevices.includes(m.message.sender)){
@@ -44,11 +39,9 @@ module.exports = function(){
           break;
         case 'notify':
           //activity started, initialize other device
-          response.tag = 'init';
-          response.sender = 'pinchy';
-          response.timeStamp = Date.now();
-          console.log('sending ' + response.tag);
-          interface.publishMessage(response);
+          var init = responseFactory('init', 'pinchy', 'videoId...', transmitDuration + 1000);
+          console.log('sending ' + init.tag);
+          interface.publishMessage(init);
           break;
 
         case 'ready':
@@ -62,8 +55,8 @@ module.exports = function(){
           //console.log('transmitDuration in milliseconds: ' + transmitDuration);
           //console.log('time to start/stop: ' + response.info.time);
           console.log('Sending start and stop');
-          var start = responseFactory('start', 'pinchy', 'test', transmitDuration + 1000);
-          var stop = responseFactory('stop', 'pinchy', 'test', transmitDuration + 1000);
+          var start = responseFactory('start', 'pinchy', 'videoId...', transmitDuration + 1000);
+          var stop = responseFactory('stop', 'pinchy', 'videoId...', transmitDuration + 1000);
           interface.publishMessage(start);
           interface.publishMessage(stop);
           break;
