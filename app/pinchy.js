@@ -6,7 +6,7 @@ let connectedDevices = [];
 //implement security
 
 module.exports = board.on('ready', function() {
-  var clickCount = 0;
+  let clickCount = 0;
 //blink lights
 //module.exports = () => {
 //led = new five.Led(13); // pin 13
@@ -16,10 +16,10 @@ module.exports = board.on('ready', function() {
     pin: "I0",
    });
  
- var accel = new five.Accelerometer({
-    pins: ["I1", "I2"],
-    freq: 100
-  });
+ // var accel = new five.Accelerometer({
+ //    pins: ["I1", "I2"],
+ //    freq: 100
+ //  });
   
  
 
@@ -31,21 +31,7 @@ module.exports = board.on('ready', function() {
 
     console.log("axischange", this.raw);
   });*/
-  function clickSensorInput() {
-        clickCount++;
-    if (clickCount === 1) {
-        singleClickTimer = setTimeout(function() {
-            clickCount = 0;
-            //singleClick();
-            console.log("One click");
-        }, 400);
-    } else if (clickCount === 2) {
-        clearTimeout(singleClickTimer);
-        clickCount = 0;
-        console.log("two click");
-        //doubleClick();
-    }
-}
+
 
   //Handle push button events 
 /*function startTimer() {
@@ -74,9 +60,9 @@ module.exports = board.on('ready', function() {
   callback on established connection and on request*/
   apiInterface.addChannelListener('pinchy_channel', () => {
     //Connection callback
-    let testMessage = responseFactory('info', 'sender', null, null);
-    console.log('connection established, sends test info');
-    apiInterface.publishMessage(testMessage);
+    // let testMessage = responseFactory('requestInfo', 'sender', null, null);
+    console.log('connection established');
+    // apiInterface.publishMessage(testMessage);
   },
   (m) => {
     //response callback
@@ -105,9 +91,10 @@ module.exports = board.on('ready', function() {
           //activity started, initialize other device
           videoId = parseInt(message.info.videoId);
           startTime = parseInt(message.info.time);
-          let init = responseFactory('init', 'pinchy', videoId, startTime);
-          console.log('sending ' + init.tag);
+          let init = responseFactory('init', 'pinchy', videoId, startTime, null);
+          console.log('sending init');
           apiInterface.publishMessage(init);
+          //addSensorListener();
           break;
 
         case 'ready':
@@ -117,14 +104,15 @@ module.exports = board.on('ready', function() {
 
         case 'info':
           //swicth playing device, send start and stop
-          let transmitDuration = calcDiff(message.timeStamp);
+          let transmitDuration = calcDiff(message.timeStamp)/1000;
           //console.log('transmitDuration in milliseconds: ' + transmitDuration);
           //console.log('time to start/stop: ' + response.info.time);
-          videoId = parseInt(message.info.videoId);
-          startTime = parseInt(message.info.time);
+          videoId = message.info.videoId;
+          console.log(videoId);
+          startTime = parseInt(message.info.time)/1000;
           
-          let start = responseFactory('start', 'pinchy', videoId, startTime + transmitDuration + 1000);
-          let stop = responseFactory('stop', 'pinchy', videoId, startTime + transmitDuration + 1000);
+          let start = responseFactory('start', 'pinchy', videoId, startTime + transmitDuration + 1, null);
+          let stop = responseFactory('stop', 'pinchy', videoId, startTime*1000 + transmitDuration*1000 + 1000, null);
           apiInterface.publishMessage(start);
           apiInterface.publishMessage(stop);
           break;
@@ -153,24 +141,43 @@ module.exports = board.on('ready', function() {
     console.log('listen for sensor input');
      ["down"].forEach(function(type) {
       touch.on(type, function() {
-       clickSensorInput();
-        console.log(type);
+        clickSensorInput();
       });
     });
     //when finger input, send choice and info
   
   }
-  let responseFactory = (tag, sender, videoId, time) => {
+  let clickSensorInput = function() {
+    clickCount++;
+    if (clickCount === 1) {
+        singleClickTimer = setTimeout(function() {
+            clickCount = 0;
+            console.log("One click, send request");
+            let request = responseFactory('requestInfo', 'pinchy', null, null, null);
+            let choice = responseFactory('choice', 'pinchy', null, null, 'yes');
+            apiInterface.publishMessage(request);
+            apiInterface.publishMessage(choice);
+        }, 400);
+    } else if (clickCount >= 2) {
+        clearTimeout(singleClickTimer);
+        clickCount = 0;
+        console.log("Double click, send choice");
+        let choice = responseFactory('choice', 'pinchy', null, null, 'no');
+        apiInterface.publishMessage(choice);
+    }
+  }
+  let responseFactory = (tag, sender, videoId, time, choice) => {
       return JSON.stringify({
         "tag": tag,
         "sender": sender,
         "info": {
           "videoId": videoId,
-          "time": time
+          "time": time,
+          "choice": choice
         },
         "timeStamp": Date.now()
       });
   }
 
 });
-//}
+// }
