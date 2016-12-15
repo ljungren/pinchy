@@ -74,31 +74,38 @@ module.exports = board.on('ready', function() {
   callback on established connection and on request*/
   apiInterface.addChannelListener('pinchy_channel', () => {
     //Connection callback
-    let testMessage = responseFactory('info', 'sender', 'videoId', '3000')
-    console.log('connection established, sends test object: ' + testMessage.tag);
+    let testMessage = responseFactory('info', 'sender', null, null);
+    console.log('connection established, sends test info');
     apiInterface.publishMessage(testMessage);
   },
   (m) => {
     //response callback
-    console.log('recieved message on ' + m.channel + ': ' + m.message.tag);
-    formatResponse(m);
+    let channel = m.channel;
+    let message = JSON.parse(m.message);
+
+    console.log('recieved message on ' + channel + ': ' + message.tag);
+    formatResponse(channel, message);
 
   });
 
 
-  let formatResponse = (m) => {
+  let formatResponse = (channel, message) => {
+    let videoId = null;
+    let startTime = null;
     //check tag and format response accordingly
-    if(m.channel=='pinchy_channel'){
-      switch(m.message.tag){
+    if(channel=='pinchy_channel'){
+      switch(message.tag){
         case 'connect':
-          if(!connectedDevices.includes(m.message.sender)){
-            connectedDevices.push(m.message.sender);
+          if(!connectedDevices.includes(message.sender)){
+            connectedDevices.push(message.sender);
           }
           console.log('nr of connected devices: ' + connectedDevices.length);
           break;
         case 'notify':
           //activity started, initialize other device
-          let init = responseFactory('init', 'pinchy', 'videoId...', transmitDuration + 1000);
+          videoId = parseInt(message.info.videoId);
+          startTime = parseInt(message.info.time);
+          let init = responseFactory('init', 'pinchy', videoId, startTime);
           console.log('sending ' + init.tag);
           apiInterface.publishMessage(init);
           break;
@@ -110,12 +117,14 @@ module.exports = board.on('ready', function() {
 
         case 'info':
           //swicth playing device, send start and stop
-          let transmitDuration = calcDiff(m.message.timeStamp);
+          let transmitDuration = calcDiff(message.timeStamp);
           //console.log('transmitDuration in milliseconds: ' + transmitDuration);
           //console.log('time to start/stop: ' + response.info.time);
-          console.log('Sending start and stop');
-          let start = responseFactory('start', 'pinchy', 'videoId...', transmitDuration + 1000);
-          let stop = responseFactory('stop', 'pinchy', 'videoId...', transmitDuration + 1000);
+          videoId = parseInt(message.info.videoId);
+          startTime = parseInt(message.info.time);
+          
+          let start = responseFactory('start', 'pinchy', videoId, startTime + transmitDuration + 1000);
+          let stop = responseFactory('stop', 'pinchy', videoId, startTime + transmitDuration + 1000);
           apiInterface.publishMessage(start);
           apiInterface.publishMessage(stop);
           break;
@@ -152,7 +161,7 @@ module.exports = board.on('ready', function() {
   
   }
   let responseFactory = (tag, sender, videoId, time) => {
-      return {
+      return JSON.stringify({
         "tag": tag,
         "sender": sender,
         "info": {
@@ -160,7 +169,7 @@ module.exports = board.on('ready', function() {
           "time": time
         },
         "timeStamp": Date.now()
-      }
+      });
   }
 
 });
