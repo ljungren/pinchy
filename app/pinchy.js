@@ -1,15 +1,74 @@
 const apiInterface = require('./interface')
-//const five = require('johnny-five');
-//const board = new five.Board();
+const five = require('johnny-five');
+const board = new five.Board();
 
 let connectedDevices = [];
 //implement security
 
-//module.exports = board.on('ready', function() {
-  //blink lights
-module.exports = () => {
-  // led = new five.Led(13); // pin 13
-  // led.blink(500); // 500ms interval
+module.exports = board.on('ready', function() {
+  var clickCount = 0;
+//blink lights
+//module.exports = () => {
+//led = new five.Led(13); // pin 13
+//led.blink(500); // 500ms interval
+  var touch = new five.Button({
+    controller: "TINKERKIT",
+    pin: "I0",
+   });
+ 
+ var accel = new five.Accelerometer({
+    pins: ["I1", "I2"],
+    freq: 100
+  });
+  
+ 
+
+  // "axischange"
+  //
+  // Fires only when X, Y or Z has changed
+  //
+  /*accel.on("axischange", function() {
+
+    console.log("axischange", this.raw);
+  });*/
+  function clickSensorInput() {
+        clickCount++;
+    if (clickCount === 1) {
+        singleClickTimer = setTimeout(function() {
+            clickCount = 0;
+            //singleClick();
+            console.log("One click");
+        }, 400);
+    } else if (clickCount === 2) {
+        clearTimeout(singleClickTimer);
+        clickCount = 0;
+        console.log("two click");
+        //doubleClick();
+    }
+}
+
+  //Handle push button events 
+/*function startTimer() {
+    var timer = 4, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10)
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        //display.textContent = minutes + ":" + seconds;
+        if(nrOfClicks>1){
+          //Skicka JAAAAAA
+          timer = duration;
+        }
+        if(--timer<0 || nrOfClicks<=1)
+          timer = duration;
+          //Skicka Neeeeej
+      },1000);
+  }*/
+
+
+
 
   /*create listener on channel with
   callback on established connection and on request*/
@@ -80,9 +139,17 @@ module.exports = () => {
   }
 
   let addSensorListener = () => {
+    
     //when couch sensor is triggered, send question, then listen for finger input
     console.log('listen for sensor input');
+     ["down"].forEach(function(type) {
+      touch.on(type, function() {
+       clickSensorInput();
+        console.log(type);
+      });
+    });
     //when finger input, send choice and info
+  
   }
   let responseFactory = (tag, sender, videoId, time) => {
       return {
@@ -96,5 +163,5 @@ module.exports = () => {
       }
   }
 
-//});
-}
+});
+//}
