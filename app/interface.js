@@ -56,6 +56,6 @@ module.exports = {
         console.log("Subscribing..");
         pubnub.subscribe({
             channels: [channelName]
-        });   
+        });
     }
 };
