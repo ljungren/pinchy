@@ -3,6 +3,7 @@ const five = require('johnny-five');
 const board = new five.Board();
 
 let connectedDevices = [];
+let accTriggered = false;
 //implement security on device recognition, 
 //only those who are connected can communicate
 
@@ -13,7 +14,7 @@ module.exports = board.on('ready', function() {
     controller: "TINKERKIT",
     pin: "I0",
   });
-  let accel = new five.Accelerometer({
+  var accel = new five.Accelerometer({
     pins: ["I1", "I2"],
     freq: 100
   });
@@ -22,9 +23,20 @@ module.exports = board.on('ready', function() {
   callback on established connection and on request*/
   apiInterface.addChannelListener('pinchy_channel', () => {
     //Connection callback
-    // let testMessage = responseFactory('requestInfo', 'sender', null, null);
     console.log('connection established');
-    // apiInterface.publishMessage(testMessage);
+
+    //test without android
+    setTimeout( () => {
+      let testMessage = responseFactory('notify', 'pinchy-android-tester', '4QrvLoxFAM4', 5000, null, null);
+      console.log('sends notify');
+      apiInterface.publishMessage(testMessage);
+    }, 2000);
+
+    // setTimeout( () => {
+    //   let testMessage = responseFactory('info', 'pinchy-android-tester', '4QrvLoxFAM4', 5000, null, null);
+    //   console.log('sends info');
+    //   apiInterface.publishMessage(testMessage);
+    // }, 8000);
   },
   (m) => {
     //response callback
@@ -97,22 +109,23 @@ module.exports = board.on('ready', function() {
   let addSensorListener = () => {
     //when couch sensor is triggered, send question, then listen for finger input
     console.log('listen for sensor input');
-
-    accel.on("axischange", () => {
-      console.log("axischange", this.raw);
-      let temp = this.raw;
-      setTimeOut( () => {
-        if(this.raw-temp >= 5 || this.raw-temp <= 5){
+    if(!accTriggered){
+      accel.on("change", function() {
+        // console.log("X: %d", this.x);
+        // console.log("Y: %d", this.y);
+        if(this.x >= 3 || this.y >= 3){
           console.log('couch sensor triggered, send question and listen for finger input');
           let question = responseFactory('question', 'pinchy', null, null, null, null);
           apiInterface.publishMessage(question);
-          addfingerSensorListener();
+          addFingerSensorListener();
+          accel.disable();
+          accTriggered = true;
         }
-      }), 200);
-    });
+      });
+    }
   }
 
-  let addSensorListener = () => {
+  let addFingerSensorListener = () => {
     //listen for finger input
     ["down"].forEach(function(type) {
       touch.on(type, function() {
