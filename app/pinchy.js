@@ -26,17 +26,11 @@ module.exports = board.on('ready', function() {
     console.log('connection established');
 
     //test without android
-    setTimeout( () => {
-      let testMessage = responseFactory('notify', 'pinchy-android-tester', '4QrvLoxFAM4', 5000, null, null);
-      console.log('sends notify');
-      apiInterface.publishMessage(testMessage);
-    }, 2000);
-
     // setTimeout( () => {
-    //   let testMessage = responseFactory('info', 'pinchy-android-tester', '4QrvLoxFAM4', 5000, null, null);
-    //   console.log('sends info');
+    //   let testMessage = responseFactory('notify', 'pinchy-android-tester', '4QrvLoxFAM4', 5000, null, null);
+    //   console.log('sends notify');
     //   apiInterface.publishMessage(testMessage);
-    // }, 8000);
+    // }, 2000);
   },
   (m) => {
     //response callback
@@ -117,9 +111,9 @@ module.exports = board.on('ready', function() {
           console.log('couch sensor triggered, send question and listen for finger input');
           let question = responseFactory('question', 'pinchy', null, null, null, null);
           apiInterface.publishMessage(question);
-          addFingerSensorListener();
           accel.disable();
           accTriggered = true;
+          addFingerSensorListener();
         }
       });
     }
