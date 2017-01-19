@@ -1,11 +1,9 @@
 const PubNub = require('pubnub');
-
-const publishKey = "pub-c-22d7266d-4ebc-43b7-bbed-8feb537f0eb2";
-const subscribeKey = "sub-c-56c59d4e-b6d6-11e6-a071-02ee2ddab7fe";
+const config = require('./config');
 
 const pubnub = new PubNub({
-    subscribeKey: subscribeKey,
-    publishKey: publishKey,
+    subscribeKey: config.subscribeKey,
+    publishKey: config.publishKey,
     ssl: true
 });
 
